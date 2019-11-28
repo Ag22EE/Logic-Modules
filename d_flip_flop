@@ -1,0 +1,26 @@
+//Kevin Sipple
+`timescale 1ns / 1ps
+
+module d_flip_flop(Q, notQ, Clk, D);
+    //delcare ports
+    output wire Q, notQ; // slave output
+    input wire Clk, D;
+    
+    wire notClk;   
+    //output of master Dlatch
+    wire Qm, notnotClk; 
+    
+    wire notQm; // left unconnected
+    
+    // 2ns delay on Not gate
+    not #2 not0(notClk, Clk);
+    
+    assign #4 notnotClk = Clk;
+    //not #2 not1(notnotclk, notClk);  // will have 4 ns delay
+    
+    //d_latch(Q, notQ, En, D) set up
+    d_latch master(Qm, notQm, notClk, D);
+    
+    d_latch slave(Q, notQ, notnotClk, Qm);
+    
+endmodule
