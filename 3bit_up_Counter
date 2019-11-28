@@ -1,0 +1,45 @@
+//Kevin Sipple
+`timescale 1ns / 1ps
+//`default_nettype none
+
+module up_counter(Count, Carry2, En, Clk, Rst);
+    //count will be held so make type reg
+    output reg [2:0] Count;
+    output wire Carry2;
+    //input wires
+    input wire En, Clk, Rst;
+    //intermediate wires
+    wire [2:0] Carry, Sum;
+    
+    Threebit_counter UC1( Sum, Carry2, Count, En);
+    // write logic of latch to hold based on clk or rst
+    always@(posedge Clk or posedge Rst)
+        if(Rst) // if Rst = 1'b1
+            Count <= 0;
+        else 
+            Count <= Sum;
+    
+endmodule
+
+//set up module mentioned above in up_counter.
+module Threebit_counter( Sum, Carry2, Count, En);
+    //En is the A input of first half Adder
+    input En;
+    input[2:0]Count;
+    
+    output [2:0]Sum;
+    output Carry2;  // final carry out of counter module
+ // intermediate wires for half_adder carries
+    wire [2:0] Carry;
+    
+// set up of half_adder module (S, Cout, A, B);  
+    half_adder adder1(Sum[0], Carry[0], En, Count[0]);
+    
+    
+    half_adder adder2(Sum[1], Carry[1], Count[0], Count[1]);
+    half_adder adder3(Sum[2], Carry[2], Carry[1], Count[2]);
+    
+    //assign the carry2 wire 
+    assign Carry2 = Carry[2];
+    
+endmodule
