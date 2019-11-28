@@ -1,0 +1,23 @@
+// Kevin Sipple
+`timescale 1ns / 1 ps
+`default_nettype none
+
+module two_one_mux(Y,A, B, S);
+    
+    // 1 - bit input and output wires 
+    output wire Y;
+    input wire A, B, S;
+    
+    //names of the output wires from gates
+    wire notS;
+    wire andA;
+    wire andB; 
+    
+    // make assignments using primitve gate modules to make expressions
+    not not0(notS, S);
+    and and0(andA, notS, A);
+    and and1(andB, S, B);
+    or or0(Y, andA, andB);
+    
+
+endmodule
