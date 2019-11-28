@@ -1,0 +1,24 @@
+// Kevin Sipple
+`timescale 1ns / 1ps
+`default_nettype none
+
+//this module is for a full adder
+
+module full_adder(S, Cout, A, B, Cin);
+
+    input wire A, B, Cin; // 1 bit wide input wires
+    output wire S, Cout;  // 1 bit wide output
+    
+    // defining internal result wires
+    wire andBCin, andACin, andAB;
+    
+    // assign the proper expressions with ^ XOR and & AND  assign gate delays
+    assign #6 S = A ^ B ^ Cin; 
+    assign #4 andAB = A & B;
+    assign #4 andBCin = B & Cin;
+    assign #4 andACin = A & Cin;
+    
+    // combine the logic results to an OR
+    assign #6 Cout = andAB | andBCin | andACin;
+    
+endmodule
