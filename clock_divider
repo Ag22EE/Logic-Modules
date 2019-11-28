@@ -1,0 +1,24 @@
+//Kevin Sipple
+
+`timescale 1ns / 1ps
+
+module clock_divider(ClkOut, ClkIn);
+
+//output is going to be driven by behavioral so must be reg type
+    output wire reg [3:0] ClkOut;
+    input wire ClkIn;
+    
+    // a changable parameter that is used in code for bit size
+    
+    parameter n = 26;
+    //experiement 2 part 3 has this line get changed to 26
+    
+    reg [n:0] Count;  // counter bit is oof width n
+
+    always@(posedge ClkIn) 
+        Count <= Count + 1; // on posedge add one to the current count value
+    
+      //assign clock out 4 bits to Count bits n  
+    assign ClkOut[3:0]= Count[n: n-3];
+
+endmodule
