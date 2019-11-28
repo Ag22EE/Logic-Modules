@@ -1,0 +1,21 @@
+// Kevin Sipple
+`timescale 1ns / 1ps
+
+module d_flip_flop_behavioral(
+
+    // type reg as this will be held 
+    output reg Q,
+    output wire notQ,
+    
+    input wire D,
+    input wire Clk // clock signal input
+
+);
+
+    always@ (posedge Clk) // triggered at rising edege of clock
+        
+        Q <= D; // non blocking statement 
+        
+    assign notQ = ~Q;  // blocking statement for notQ
+
+endmodule
