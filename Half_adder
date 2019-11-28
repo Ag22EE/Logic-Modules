@@ -1,0 +1,16 @@
+//Kevin Sipple
+
+`timescale 1ns / 1ps
+
+module half_adder(S, Cout, A, B);
+
+    output wire S;
+    output wire Cout;
+    
+    input wire A,B;
+    
+    // using dataflow to assign wires
+    assign S = A^B; // A XOR B = Sum
+    assign Cout = A&B;  // A AND B = Cout
+
+endmodule
