@@ -1,0 +1,38 @@
+// Kevin Sipple
+// 4 bit ALU
+`timescale 1ns / 1ps
+`default_nettype none
+
+//name module and outputs and inputs order
+module four_bit_alu(Result, Overflow, opA, opB, ctrl);
+    
+    //4 bit wide result
+    output wire [3:0] Result;
+    output wire Overflow;
+    
+    input wire [3:0] opA, opB;
+    // ctrl bit will decide whether the output is arithmetic or AND
+    input wire [1:0] ctrl;
+    
+    // assign wire arithm to be the wire between add_sub and mux input
+    wire [3:0] arithm;
+    wire [3:0] AandB;
+    // overflow from add_sub unit
+    wire OverAdd_sub;
+    
+    //assign the AandB pins to the corresponding function bitwise
+    assign AandB[0] = opA[0] & opB[0];
+    assign AandB[1] = opA[1] & opB[1];
+    assign AandB[2] = opA[2] & opB[2];
+    assign AandB[3] = opA[3] & opB[3];
+    
+// instantiate the add_sub unit the pin order of this was (Sum, Overflow, opA, opB, opSel) 
+    add_sub add_sub0(arithm, OverAdd_sub, opA, opB, ctrl[1]);
+    //assign the boolean expression AND for the overflow output
+    assign Overflow = (OverAdd_sub & ctrl[0]);
+    
+    //instantiate the four bit mux to take in the wires as follows (Result, AND, Sum, OP)
+    four_bit_mux four_bit_mux0( Result, AandB, arithm, ctrl[0]);   // B needs to be an And
+    
+endmodule
+
