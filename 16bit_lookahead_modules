@@ -1,0 +1,119 @@
+`timescale 1ns / 1ps
+//Kevin Sipple
+
+module generate_propagate_unit(G, P, X, Y );
+    
+    output wire [15:0] G,P; //output of 16 bits
+    input wire [15:0] X,Y; // input 16 bits
+
+    assign #2 G[0] = X[0] & Y[0]; // set up the assignment of X AND Y to have a 2 ns gate delay
+    assign #2 G[1] = X[1] & Y[1];
+    assign #2 G[2] = X[2] & Y[2];
+    assign #2 G[3] = X[3] & Y[3];
+    
+    assign #2 P[0] = X[0] ^ Y[0]; // Set up the assignment of X XOR Y to have a 2 ns gate delay
+    assign #2 P[1] = X[1] ^ Y[1];
+    assign #2 P[2] = X[2] ^ Y[2];
+    assign #2 P[3] = X[3] ^ Y[3];     
+    
+//Follow the set up for all 16 bits
+    assign #2 G[4] = X[4] & Y[4];
+    assign #2 G[5] = X[5] & Y[5];
+    assign #2 G[6] = X[6] & Y[6];
+    assign #2 G[7] = X[7] & Y[7];
+            
+    assign #2 P[4] = X[4] ^ Y[4];
+    assign #2 P[5] = X[5] ^ Y[5];
+    assign #2 P[6] = X[6] ^ Y[6];
+    assign #2 P[7] = X[7] ^ Y[7]; 
+    
+    assign #2 G[8] = X[8] & Y[8];
+    assign #2 G[9] = X[9] & Y[9];
+    assign #2 G[10] = X[10] & Y[10];
+    assign #2 G[11] = X[11] & Y[11];
+            
+    assign #2 P[8] = X[8] ^ Y[8];
+    assign #2 P[9] = X[9] ^ Y[9];
+    assign #2 P[10] = X[10] ^ Y[10];
+    assign #2 P[11] = X[11] ^ Y[11];     
+
+    assign #2 G[12] = X[12] & Y[12];
+    assign #2 G[13] = X[13] & Y[13];
+    assign #2 G[14] = X[14] & Y[14];
+    assign #2 G[15] = X[15] & Y[15];
+            
+    assign #2 P[12] = X[12] ^ Y[12];
+    assign #2 P[13] = X[13] ^ Y[13];
+    assign #2 P[14] = X[14] ^ Y[14];
+    assign #2 P[15] = X[15] ^ Y[15]; 
+endmodule
+
+//Kevin Sipple
+module block_carry_lookahead_unit(G_star, P_star, C, G, P, C0);
+
+    output wire G_star, P_star; // block generate and propogate for next level
+    output wire [3:1] C; //  wires c3, c2, c1 each 3 bits wide
+    
+    input wire [3:0] G, P; // generate and propagates 4 bits wide
+    input wire C0; // carry in bit
+    
+    assign #4 C[1] = G[0] | (P[0] & C0); // include 4ns delay for the use of 1 AND gate and 1 OR gate
+    
+    assign #4 C[2] = G[1] | (G[0] & P[1]) | (P[1] & P[0] & C0); // include 4ns delay for the use of 2 AND gates and 1 OR gate
+    
+    assign #4 C[3] = G[2] | (G[1] & P[2]) | (G[0] & P[2] & P[1]) | (C0 & P[2] & P[1] & P[0]) ; // Include 4ns delay for the use of 3 AND gates and 1 OR gate
+    
+    assign #4 G_star = G[3] | (G[2] & P[3]) | (G[0] & P[3] & P[2] & P[1]) | (G[1] & P[3] & P[2]); // Include 4ns delay for the use of 3 AND gates and 1 OR gate
+    
+    assign #2 P_star = P[3] & P[2] & P[1] & P[0];
+    
+endmodule
+//Kevin Sipple
+module carry_lookahead_unit(C, G, P, C0);
+
+    output wire [4:1] C; //  C4, c3, c2, c1 3 bits wide
+    
+    input wire [3:0] G, P; // generate and propagate 4 bits wide
+    input wire C0; // carry in bit
+    
+    assign #4 C[1] = G[0] | (P[0] & C0); // 4ns delay for the use of 1 AND and 1 OR gate
+    
+    assign #4 C[2] = G[1] | (G[0] & P[1]) | (P[1] & P[0] & C0); // 4ns delay for the use of 2 AND gates an 1 OR gate
+    
+    assign #4 C[3] = G[2] | (G[1] & P[2]) | (G[0] & P[2] & P[1]) | (C0 & P[2] & P[1] & P[0]); // 4ns  delay for the use 3 AND gates 1 OR gates 
+    
+    assign #4 C[4] = G[3] | (G[2] & P[3]) | (G[0] & P[3] & P[2] & P[1]) | (G[1] & P[3] & P[2]) | (C0 & P[3] & P[2] & P[1] & P[0]); 
+    // 4ns delay for the use of 4 AND gates and 1 OR gates
+    
+endmodule
+
+
+//Kevin Sipple
+module summation_unit( S, P, C);
+
+    output wire [15:0] S; // sum vector 16 bits
+    
+    input wire [15:0] P,C; // propagate and carry vectors 16 bits
+    
+    // assign a 2ns delay for the XOR gate through all 16 bits.
+    assign #2 S[0] = P[0] ^ C[0];
+    assign #2 S[1] = P[1] ^ C[1];
+    assign #2 S[2] = P[2] ^ C[2];
+    assign #2 S[3] = P[3] ^ C[3];  
+    assign #2 S[4] = P[4] ^ C[4];
+    
+    assign #2 S[5] = P[5] ^ C[5];
+    assign #2 S[6] = P[6] ^ C[6];
+    assign #2 S[7] = P[7] ^ C[7];
+    assign #2 S[8] = P[8] ^ C[8];
+    
+    assign #2 S[9] = P[9] ^ C[9];
+    assign #2 S[10] = P[10] ^ C[10];
+    assign #2 S[11] = P[11] ^ C[11];
+    assign #2 S[12] = P[12] ^ C[12];
+
+    assign #2 S[13] = P[13] ^ C[13];
+    assign #2 S[14] = P[14] ^ C[14];
+    assign #2 S[15] = P[15] ^ C[15];
+    
+endmodule
