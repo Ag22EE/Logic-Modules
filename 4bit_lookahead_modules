@@ -1,0 +1,54 @@
+`timescale 1ns / 1ps
+//Kevin Sipple
+module generate_propagate_unit(G, P, X, Y );
+    
+    output wire [3:0] G,P;  // 4 bit input and output
+    input wire [3:0] X,Y;
+    
+    // AND both x and y for G ouput bit with 2ns gate delay
+    assign #2 G[0] = X[0] & Y[0];
+    assign #2 G[1] = X[1] & Y[1];
+    assign #2 G[2] = X[2] & Y[2];
+    assign #2 G[3] = X[3] & Y[3];
+    //XOR both x and y for G ouput bit with 2ns gate delay      
+    assign #2 P[0] = X[0] ^ Y[0];
+    assign #2 P[1] = X[1] ^ Y[1];
+    assign #2 P[2] = X[2] ^ Y[2];
+    assign #2 P[3] = X[3] ^ Y[3];     
+
+endmodule
+
+module carry_lookahead_unit(C, G, P, C0);
+
+    output wire [4:1] C; //  c3, c2, c1
+    
+    input wire [3:0] G, P; // generate and propagates
+    input wire C0; // carry in
+    
+    //generate_propagate_unit(G, P, X, Y );
+    
+    
+    assign #4 C[1] = G[0] | (P[0] & C0);
+    
+    assign #4 C[2] = G[1] | (G[0] & P[1]) | (P[1] & P[0] & C0);
+    
+    assign #4 C[3] = G[2] | (G[1] & P[2]) | (G[0] & P[2] & P[1]) | (C0 & P[2] & P[1] & P[0]) ;
+    
+    assign #4 C[4] = G[3] | (G[2] & P[3]) | (G[0] & P[3] & P[2] & P[1]) | (G[1] & P[3] & P[2]) | (C0 & P[3] & P[2] & P[1] & P[0]);
+    
+endmodule
+
+//Kevin Sipple
+module summation_unit( S, P, C);
+
+    output wire [3:0] S; // sum vector of 4 bits
+    
+    input wire [3:0] P,C; // propagate and carry vectors of 4 bits wide
+    
+    // XOR bits to produce sum with 2ns gate delay
+    assign #2 S[0] = P[0] ^ C[0];
+    assign #2 S[1] = P[1] ^ C[1];
+    assign #2 S[2] = P[2] ^ C[2];
+    assign #2 S[3] = P[3] ^ C[3];    
+            
+endmodule
