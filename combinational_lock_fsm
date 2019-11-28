@@ -1,0 +1,77 @@
+// Kevin Sipple
+module combination_lock_fsm(
+
+    output reg [1:0] state, // 3 bit states  
+    output wire [3:0] Lock, //assert when locked
+    input wire Key1, //unlock button 1
+    input wire Key2, // unlock button 2
+    input wire[3:0] Password, // 4 bit wide password
+    input wire Reset,  //   
+    input wire Clk // clock signal
+);
+    reg [1:0] nextState; //3 bits for states
+    reg [3:0] lock;  // 4 bit reg lock
+    
+    parameter // bit id for each state
+        S0 = 2'b00,
+        S1 = 2'b01,
+        S2 = 2'b10,
+        S3 = 2'b11;
+
+    always@(posedge Clk) begin // active on poseedge of clock
+        if(Reset) begin
+            state <= S0;
+        end        
+        else //update state
+            state <= nextState;
+    end          
+         
+always@(*)begin // active when anything changes
+    case(state) // begin case for states 
+        S0: begin
+            lock = 4'b0000;  //locked       
+            if(Key1 && Password==4'b1101) // 13
+                nextState = S1;     
+            else 
+                nextState = S0;
+
+            end
+
+        S1: begin
+            //Lock=0;
+            lock = 4'b0000; 
+            if( Key2 && Password==4'b0111) // 7
+                nextState = S2;
+                
+            else if(Key2 && Password != 4'b0111)
+               nextState = S0;
+               
+            else 
+                nextState=S1; //otherwise
+                
+            end
+
+        S2: begin
+            //Lock=0;
+            lock = 4'b0000; 
+            if( Key1 && Password==4'b1001) // 9
+                nextState=S3;
+                
+            else if(Password != 4'b1001 && Key1)
+                nextState = S0;
+                
+            else 
+                nextState=S2; //otherwise
+            end
+
+        S3: begin
+            nextState = S3; //final state
+            lock = 4'b1111; //unlocked
+            end
+      endcase
+      
+end
+
+assign Lock = lock; //assign the lock reg to wires output
+
+endmodule
