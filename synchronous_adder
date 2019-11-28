@@ -1,0 +1,35 @@
+//Kevin Sipple
+`timescale 1ns / 1ps
+`default_nettype none
+
+module adder_synchronous( Carry_reg, Sum_reg, Clk, A, B);
+
+//outputs will be type reg as they will hold states
+    output reg Carry_reg;
+    output reg [1:0] Sum_reg;
+    
+    input wire Clk;
+    input wire [1:0] A, B;
+    
+    // define signal wires, these will be in and out of the adder
+    reg [1:0] A_reg, B_reg; 
+    wire Carry;
+    wire [1:0] Sum;
+    
+// module adder_2bit(Carry, Sum, A, B);
+    // instantiate the adder
+    adder_2bit adder0( Carry, Sum, A_reg, B_reg);
+    
+    always@(posedge Clk)  // excecute when the clock cylces on
+        begin  // non blocking will be used to compute in parallel
+            A_reg <= A;
+            B_reg <= B;
+        end
+    
+    always@( posedge Clk)   // this block will execute in unison with the previous always.
+        begin   //non blocking is used again for parallel execution
+            Carry_reg <= Carry;
+            Sum_reg <= Sum;
+        end
+    
+endmodule
