@@ -1,0 +1,29 @@
+// Kevin Sipple
+`timescale 1ns / 1ps
+`default_nettype none
+
+module four_two_encoder(
+    
+    input wire [3:0] W,
+    output wire zero,
+    // set Y as a 2 bit reg type output
+    output reg [1:0] Y
+    
+);
+
+    assign zero = ( W == 4'b0000 ); 
+    
+    // trigger when W is changed
+    always@(W)
+        begin
+        // cases rely on W
+            case(W)
+                4'b0001: Y = 2'b00;
+                4'b0010: Y = 2'b01;  // change W[x] to the corresponding bit
+                4'b0100: Y = 2'b10;
+                4'b1000: Y = 2'b11;
+                default: Y = 2'bXX; // using X signifies default for cases not listed
+            endcase
+        end
+        
+endmodule
