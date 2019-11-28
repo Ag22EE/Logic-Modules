@@ -1,0 +1,29 @@
+// Kevin Sipple
+`timescale 1ns / 1ps
+`default_nettype none
+
+
+module two_four_decoder(
+    
+    input wire [1:0] W, 
+    input wire En,   // En is an enable pin
+    // set Y to a four bit output reg
+    output reg [3:0] Y
+);
+
+// trigger when En and W are changed
+    always@(En, W)
+        begin
+            if( En == 1'b1) // iF En input is equal to 1` then enter block
+                case(W)
+                // handle bit cases for W 
+                    2'b00: Y = 4'b0001;
+                    2'b01: Y = 4'b0010;
+                    2'b10: Y = 4'b0100;
+                    2'b11: Y = 4'b1000;
+                endcase
+            else  // else case if the if state is false
+                Y = 4'b0000; // disable all output 
+        end
+
+endmodule
