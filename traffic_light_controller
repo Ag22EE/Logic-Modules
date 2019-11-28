@@ -1,0 +1,143 @@
+// Kevin Sipple
+
+`default_nettype none   // set the times as variables
+`define one_sec     50000000
+`define thirty_sec  1500000000
+`define three_sec   150000000
+`define fifteen_sec 750000000
+
+module tlc_fsm(
+    output reg [2:0] state,  //three bit state to handle 6 states
+    output reg RstCount,
+    output reg [1:0] highwaySignal, farmSignal, //two bit signals for lights
+    
+    input wire farmSensor,
+    input wire [30 : 0] Count,
+    input wire Clk, Rst
+
+);
+
+    reg [2:0] nextState; //3 bits for states
+
+ //*******************************************************    
+        parameter // bit id for each state
+            S0 = 3'b000,  S1 = 3'b001,
+            S2 = 3'b010,  S3 = 3'b011,
+            S4 = 3'b100,  S5 = 3'b101,
+            Srst = 3'b110,
+            
+            red = 2'b01, // bit id for the lights
+            yellow = 2'b10,
+            green = 2'b11;
+ //******************************************************************           
+        always@(posedge Clk) begin // active on poseedge of clock
+            if(Rst) begin  
+                state <= Srst;  //reset state
+            end                    
+            else begin//update state
+                state <= nextState;    
+
+            end    
+        end     
+  
+                    
+    always@(*)begin // active when anything changes
+        case(state) // begin case for states 
+            S0: begin
+                highwaySignal = red;
+                highwaySignal = red;
+                farmSignal = red;
+                RstCount = 0;     
+                
+                if(Count == `one_sec)begin //move to S1 and reset the counter
+                    nextState = S1; 
+                    RstCount = 1; 
+                    end   
+                else begin
+                    nextState = S0; //otherwise
+                    end
+                end
+    
+            S1: begin
+                highwaySignal = green;
+                farmSignal = red;
+                RstCount = 0;  
+                  // only allow to transistion if 30 seconds have elapsed and sensor active 
+                if((`thirty_sec <= Count)  && (farmSensor ==1))begin //move to S2 and reset the counter
+                    nextState = S2; 
+                    RstCount = 1;
+                    end    
+                else begin
+                    nextState = S1; //otherwise
+                    end
+                end
+    
+            S2: begin
+                highwaySignal = yellow;
+                farmSignal = red;     
+                RstCount = 0;
+                
+                if(Count == `three_sec)begin //move to S3 and reset the counter
+                    nextState = S3; 
+                    RstCount = 1; 
+                    end   
+                else 
+                    nextState = S2; //otherwise
+                end
+    
+            S3: begin
+                highwaySignal = red;
+                farmSignal = red;
+                RstCount = 0; 
+                    
+                if(Count == `one_sec) begin //move to S4 and reset the counter
+                    nextState = S4; 
+                    RstCount = 1; 
+                    end   
+                else 
+                    nextState = S3; //otherwise
+                end
+//**********************************************************************
+// this state controls the farmSignal being green when sensor is working
+            S4: begin
+                highwaySignal = red;
+                farmSignal = green;
+                RstCount = 0;
+                     // only move forward if the senor is off and three seconds pass or 15 seconds total pass
+                if( (farmSensor == 0 && (Count == `three_sec)) || (Count == `fifteen_sec))begin //move to S5 and reset the counter
+                    nextState = S5; 
+                    RstCount = 1; 
+                    end   
+                    // if the sensor goes to zero count till 3 befor moving on
+                else if( farmSensor == 0 && Count >= `three_sec)begin
+                    RstCount = 1;
+                    nextState = S4;
+                end 
+                else
+                    nextState = S4; //otherwise
+                end  
+//************************************************************************
+            S5: begin
+                    highwaySignal = red;
+                    farmSignal = yellow;
+                    RstCount = 0;     
+                    
+                    if(Count == `three_sec)begin //move to S0 and reset the counter
+                        nextState = S0; 
+                        RstCount = 1;
+                        end    
+                    else 
+                        nextState = S5; //otherwise
+                    end
+            
+            Srst: begin  //reset state move to s0 after outputs and counter reset
+                        highwaySignal = red;
+                        farmSignal = red;
+                        RstCount = 1;
+                        nextState = S0;
+                        end
+          endcase
+          
+    end
+    
+endmodule
